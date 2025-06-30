@@ -87,28 +87,30 @@ const Calendar: React.FC = () => {
   return (
     <div className="calendar-container">
       <div className="calendar-header">
-        <div className="year-controls">
-          <button onClick={() => navigate(-1)} className="nav-button">
-            &lt;&lt;
-          </button>
-          <h2 className="current-year">{currentYear}年</h2>
-          <button onClick={() => navigate(1)} className="nav-button">
-            &gt;&gt;
-          </button>
-        </div>
-        
-        <div className="month-controls">
-          <button onClick={() => navigate(0, -1)} className="nav-button">
-            &lt;
-          </button>
-          <h3 className="month-title">{currentMonth + 1}月</h3>
-          <button onClick={() => navigate(0, 1)} className="nav-button">
-            &gt;
-          </button>
+        <div className="controls-container">
+          <div className="year-controls">
+            <button onClick={() => navigate(-1)} className="nav-button">
+              &lt;&lt;
+            </button>
+            <h2 className="current-year">{currentYear}年</h2>
+            <button onClick={() => navigate(1)} className="nav-button">
+              &gt;&gt;
+            </button>
+          </div>
+          
+          <div className="month-controls">
+            <button onClick={() => navigate(0, -1)} className="nav-button">
+              &lt;
+            </button>
+            <h3 className="month-title">{currentMonth + 1}月</h3>
+            <button onClick={() => navigate(0, 1)} className="nav-button">
+              &gt;
+            </button>
+          </div>
         </div>
         
         <button onClick={goToToday} className="today-button">
-          今天
+          回到今天
         </button>
       </div>
 
