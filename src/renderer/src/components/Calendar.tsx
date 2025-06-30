@@ -1,143 +1,132 @@
-import React, { useState, useEffect } from 'react'
-import './../assets/calendar.css'
-import { Lunar } from 'lunar-javascript'
+import React, { useState, useEffect, useMemo } from 'react';
+import './../assets/calendar.css';
+import { Lunar } from 'lunar-javascript';
+
+// 日期工具函数
+const getMonthBoundaries = (year: number, month: number) => ({
+  firstDay: new Date(year, month, 1),
+  lastDay: new Date(year, month + 1, 0)
+});
+
+const isSameDate = (date1: Date, date2: Date) => (
+  date1.getFullYear() === date2.getFullYear() &&
+  date1.getMonth() === date2.getMonth() &&
+  date1.getDate() === date2.getDate()
+);
+
+// 日历单元格组件
+interface CalendarCellProps {
+  date: Date | null;
+  isToday: boolean;
+}
+
+const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday }) => {
+  if (!date) {
+    return <div className="calendar-cell empty" />;
+  }
+
+  const lunar = Lunar.fromDate(date);
+  const isWeekend = [0, 6].includes(date.getDay());
+
+  return (
+    <div className={`calendar-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}`}>
+      <div className="solar-day">{date.getDate()}</div>
+      <div className="lunar-day">{lunar.getDayInChinese()}</div>
+    </div>
+  );
+};
 
 const Calendar: React.FC = () => {
-  const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear())
-  const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth())
-  const [today, setToday] = useState<Date>(new Date())
+  const now = useMemo(() => new Date(), []);
+  const [currentDate, setCurrentDate] = useState(now);
+  const [today, setToday] = useState(now);
 
-  // 初始化时设置当前日期
+  // 每分钟更新时间
   useEffect(() => {
     const timer = setInterval(() => {
-      setToday(new Date())
-    }, 60 * 1000) // 每分钟更新一次
+      setToday(new Date());
+    }, 60_000);
+    
+    return () => clearInterval(timer);
+  }, []);
 
-    return () => clearInterval(timer)
-  }, [])
+  // 日期导航处理
+  const navigate = (years = 0, months = 0) => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setFullYear(
+        newDate.getFullYear() + years,
+        newDate.getMonth() + months
+      );
+      return newDate;
+    });
+  };
 
-  // 处理年份变化
-  const handlePrevYear = () => setCurrentYear((prev) => prev - 1)
-  const handleNextYear = () => setCurrentYear((prev) => prev + 1)
-  const handleToday = () => {
-    setCurrentYear(today.getFullYear())
-    setCurrentMonth(today.getMonth()) // 新增月份状态更新
-  }
-  // 新增月份处理函数
-  const handlePrevMonth = () => {
-    setCurrentMonth((prev) => {
-      if (prev === 0) {
-        setCurrentYear((y) => y - 1)
-        return 11
+  const goToToday = () => setCurrentDate(new Date());
+
+  // 生成日历数据
+  const calendarDays = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    const { firstDay, lastDay } = getMonthBoundaries(year, month);
+    const daysInMonth = lastDay.getDate();
+    const firstDayOfWeek = firstDay.getDay();
+    
+    return Array.from({ length: 42 }, (_, i) => {
+      if (i < firstDayOfWeek || i >= firstDayOfWeek + daysInMonth) {
+        return null;
       }
-      return prev - 1
-    })
-  }
+      return new Date(year, month, i - firstDayOfWeek + 1);
+    });
+  }, [currentDate]);
 
-  const handleNextMonth = () => {
-    setCurrentMonth((prev) => {
-      if (prev === 11) {
-        setCurrentYear((y) => y + 1)
-        return 0
-      }
-      return prev + 1
-    })
-  }
-
-  // 检查是否是今天
-  const isToday = (date: Date): boolean => {
-    return (
-      date.getFullYear() === today.getFullYear() &&
-      date.getMonth() === today.getMonth() &&
-      date.getDate() === today.getDate()
-    )
-  }
-
-  // 检查是否是周末
-  const isWeekend = (date: Date): boolean => {
-    const day = date.getDay()
-    return day === 0 || day === 6
-  }
-
-  // 获取农历显示文本
-  const getLunarText = (date: Date): string => {
-    const lunar = Lunar.fromDate(date)
-
-    return lunar.getDayInChinese()
-  }
-
-  // 当前月份
-  // const month = new Date().getMonth()
-  const firstDay = new Date(currentYear, currentMonth, 1)
-  const lastDay = new Date(currentYear, currentMonth + 1, 0)
-  // 获取当月第一天是周几（0=周日, 1=周一, ...）
-  const firstDayOfWeek = firstDay.getDay()
-  // 计算当月天数
-  const daysInMonth = lastDay.getDate()
-  // 生成日历格子
-  const days = []
-  // 添加前面的空白
-  for (let i = 0; i < firstDayOfWeek; i++) {
-    days.push(null)
-  }
-  // 添加当月日期
-  for (let i = 1; i <= daysInMonth; i++) {
-    const date = new Date(currentYear, currentMonth, i)
-    days.push(date)
-  }
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
 
   return (
     <div className="calendar-container">
       <div className="calendar-header">
-        <button onClick={handlePrevYear} className="nav-button">
-          上一年
-        </button>
-        <h2 className="current-year">{currentYear}年</h2>
-        <button onClick={handleNextYear} className="nav-button">
-          下一年
-        </button>
-        <button onClick={handleToday} className="today-button">
-          回到今天
+        <div className="year-controls">
+          <button onClick={() => navigate(-1)} className="nav-button">
+            &lt;&lt;
+          </button>
+          <h2 className="current-year">{currentYear}年</h2>
+          <button onClick={() => navigate(1)} className="nav-button">
+            &gt;&gt;
+          </button>
+        </div>
+        
+        <div className="month-controls">
+          <button onClick={() => navigate(0, -1)} className="nav-button">
+            &lt;
+          </button>
+          <h3 className="month-title">{currentMonth + 1}月</h3>
+          <button onClick={() => navigate(0, 1)} className="nav-button">
+            &gt;
+          </button>
+        </div>
+        
+        <button onClick={goToToday} className="today-button">
+          今天
         </button>
       </div>
-      <div className="month-container">
-        <button onClick={handlePrevMonth} className="nav-button">
-          上个月
-        </button>
-        <h3 className="month-title">{currentMonth + 1}月</h3>
-        <button onClick={handleNextMonth} className="nav-button">
-          下个月
-        </button>
-        <div className="calendar-grid">
-          {['日', '一', '二', '三', '四', '五', '六'].map((day, index) => (
-            <div key={index} className="calendar-header">
-              {day}
-            </div>
-          ))}
-          {days.map((date, index) => {
-            if (date === null) {
-              return <div key={index} className="calendar-cell empty"></div>
-            }
 
-            const day = date.getDate()
-            const isWeekendDay = isWeekend(date)
-            const isTodayDate = isToday(date)
-            const lunarText = getLunarText(date)
-
-            return (
-              <div
-                key={index}
-                className={`calendar-cell ${isWeekendDay ? 'weekend' : ''} ${isTodayDate ? 'today' : ''}`}
-              >
-                <div className="solar-day">{day}</div>
-                <div className="lunar-day">{lunarText}</div>
-              </div>
-            )
-          })}
-        </div>
+      <div className="calendar-grid">
+        {['日', '一', '二', '三', '四', '五', '六'].map(day => (
+          <div key={day} className="weekday-header">{day}</div>
+        ))}
+        
+        {calendarDays.map((date, index) => (
+          <CalendarCell 
+            key={index} 
+            date={date} 
+            isToday={date ? isSameDate(date, today) : false} 
+          />
+        ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Calendar
+export default Calendar;
