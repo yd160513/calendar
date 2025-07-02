@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './../assets/calendar.css';
-import { Lunar } from 'lunar-javascript';
+import { Lunar } from 'lunar-typescript';
 
 // 日期工具函数
 const getMonthBoundaries = (year: number, month: number) => ({

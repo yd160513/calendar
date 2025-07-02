@@ -22,7 +22,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
-    "lunar-javascript": "^1.7.3"
+    "lunar-typescript": "^1.8.0"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
