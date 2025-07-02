@@ -46,7 +46,7 @@ const Calendar: React.FC = () => {
     const timer = setInterval(() => {
       setToday(new Date());
     }, 60_000);
-    
+
     return () => clearInterval(timer);
   }, []);
 
@@ -68,11 +68,11 @@ const Calendar: React.FC = () => {
   const calendarDays = useMemo(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     const { firstDay, lastDay } = getMonthBoundaries(year, month);
     const daysInMonth = lastDay.getDate();
     const firstDayOfWeek = firstDay.getDay();
-    
+
     return Array.from({ length: 42 }, (_, i) => {
       if (i < firstDayOfWeek || i >= firstDayOfWeek + daysInMonth) {
         return null;
@@ -97,7 +97,7 @@ const Calendar: React.FC = () => {
               &gt;&gt;
             </button>
           </div>
-          
+
           <div className="month-controls">
             <button onClick={() => navigate(0, -1)} className="nav-button">
               &lt;
@@ -108,7 +108,7 @@ const Calendar: React.FC = () => {
             </button>
           </div>
         </div>
-        
+
         <button onClick={goToToday} className="today-button">
           回到今天
         </button>
@@ -118,12 +118,12 @@ const Calendar: React.FC = () => {
         {['日', '一', '二', '三', '四', '五', '六'].map(day => (
           <div key={day} className="weekday-header">{day}</div>
         ))}
-        
+
         {calendarDays.map((date, index) => (
-          <CalendarCell 
-            key={index} 
-            date={date} 
-            isToday={date ? isSameDate(date, today) : false} 
+          <CalendarCell
+            key={index}
+            date={date}
+            isToday={date ? isSameDate(date, today) : false}
           />
         ))}
       </div>
