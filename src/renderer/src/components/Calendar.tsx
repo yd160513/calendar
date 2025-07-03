@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './../assets/calendar.css';
-import { Lunar } from 'lunar-typescript';
+import { Lunar, HolidayUtil } from 'lunar-typescript';
 
 // 日期工具函数
 const getMonthBoundaries = (year: number, month: number) => ({
@@ -26,10 +26,38 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday }) => {
   }
 
   const lunar = Lunar.fromDate(date);
+  // 周末
   const isWeekend = [0, 6].includes(date.getDay());
+  // 节假日
+  const isHoliday = HolidayUtil.getHoliday(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  console.log(isHoliday)
+  // 补班
+  const isWorkup = isHoliday?.isWork();
+
+  const render = () => {
+    // 既是周末又是节假日且不调休
+    if (isWeekend && isHoliday && !isWorkup) {
+      return <div className="day-tip">休</div>;
+    }
+    // 周末且不调休
+    else if (isWeekend && !isWorkup) {
+      return <div className="day-tip">末</div>;
+    }
+    // 节假日且不调休
+    else if (isHoliday && !isWorkup) {
+      return <div className="day-tip">休</div>;
+    }
+    // 补班
+    else if (isWorkup) {
+      return <div className="day-tip">班</div>;
+    } else {
+      return <div className="day-tip"></div>;
+    }
+  }
 
   return (
-    <div className={`calendar-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}`}>
+    <div className={`calendar-cell ${isWeekend && isHoliday && !isWorkup ? 'holiday' : isWeekend && !isWorkup ? 'weekend' : isHoliday && !isWorkup ? 'holiday' : isWorkup ? 'work-up' : ''} ${isToday ? 'today' : ''}`}>
+      {render()}
       <div className="solar-day">{date.getDate()}</div>
       <div className="lunar-day">{lunar.getDayInChinese()}</div>
     </div>
@@ -40,6 +68,11 @@ const Calendar: React.FC = () => {
   const now = useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = useState(now);
   const [today, setToday] = useState(now);
+
+  console.log('HolidayUtil.getHoliday(): ', HolidayUtil.getHoliday(2025, 4, 27)?.isWork())
+
+  // 检查周六日是否补班
+
 
   // 每分钟更新时间
   useEffect(() => {
