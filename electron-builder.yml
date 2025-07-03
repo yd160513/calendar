@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: calendar
+appId: com.calendar.app
+productName: 万年历
 directories:
   buildResources: build
 files:

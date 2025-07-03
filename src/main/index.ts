@@ -6,6 +6,7 @@ import icon from '../../resources/icon.png?asset'
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
+    title: '万年历 - 您的私人日历',
     width: 900,
     height: 670,
     show: false,

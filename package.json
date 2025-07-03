@@ -1,10 +1,9 @@
 {
   "name": "calendar",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "基于Electron和React的万年历应用，支持农历、节假日和调休显示",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "yidong <kouyidong99@163.com>",
   "scripts": {
     "format": "prettier --write .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",

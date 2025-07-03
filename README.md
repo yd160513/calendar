@@ -1,10 +1,8 @@
 # calendar
 
-An Electron application with React and TypeScript
-
-## Recommended IDE Setup
-
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+基于 Electron + React 的跨平台桌面万年历应用，主要功能：
+- 公历/农历双历显示
+- 法定节假日及调休标识
 
 ## Project Setup
 
