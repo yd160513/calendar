@@ -4,8 +4,8 @@ import { Lunar, HolidayUtil } from 'lunar-typescript';
 
 // 日期工具函数
 const getMonthBoundaries = (year: number, month: number) => ({
-  firstDay: new Date(year, month, 1),
-  lastDay: new Date(year, month + 1, 0)
+  firstDay: new Date(year, month, 1), // month 月(0代表1月)，第三个参数 1 表示 month 的第一天
+  lastDay: new Date(year, month + 1, 0) // month + 1 表示下个月的第一天，第三个参数为 0 表示上个月的最后一天，即当前月的最后一天
 });
 
 const isSameDate = (date1: Date, date2: Date) => (
@@ -110,7 +110,9 @@ const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = true }) => {
     const month = currentDate.getMonth();
     // 计算当月边界
     const { firstDay, lastDay } = getMonthBoundaries(year, month);
+    // 当月有多少天
     const daysInMonth = lastDay.getDate();
+    // 当月第一天是星期几
     let firstDayOfWeek = firstDay.getDay();
 
     // 如果以周一为一周的第一天，调整第一天的位置
@@ -119,12 +121,21 @@ const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = true }) => {
       firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
     }
 
-    // 生成42个单元格（6周）
+    /**
+     * 生成42个单元格（6周）:
+     * 问: 为什么需要 42 个单元格？
+     * 答: 1. 行业通用做法，覆盖最长月份场景，31 天的月份 + 首日周六 = 需要 6 行（42 格）。示例：2023年12月（31天，首日周五）
+     *     2. 固定 6 行可避免月份切换时的布局跳动。
+     */
     return Array.from({ length: 42 }, (_, i) => {
       // 计算日期偏移量
       const dayOffset = i - (weekStartMonday ? firstDayOfWeek : firstDayOfWeek);
 
-      // 过滤非当月日期
+      /**
+       * 过滤非当月日期:
+       *  1. 如果 i 小于 firstDayOfWeek，说明是上个月的日期
+       *  2. 如果 i 大于等于 firstDayOfWeek + daysInMonth，说明是下个月的日期
+       */
       if (i < firstDayOfWeek || i >= firstDayOfWeek + daysInMonth) {
         return null;
       }
