@@ -14,6 +14,10 @@ const isSameDate = (date1: Date, date2: Date) => (
   date1.getDate() === date2.getDate()
 );
 
+interface CalendarProps {
+  weekStartMonday?: boolean; // 是否以周一为一周的第一天
+}
+
 // 日历单元格组件
 interface CalendarCellProps {
   date: Date | null;
@@ -64,15 +68,12 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday }) => {
   );
 };
 
-const Calendar: React.FC = () => {
+const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = true }) => {
   const now = useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = useState(now);
   const [today, setToday] = useState(now);
-
-  console.log('HolidayUtil.getHoliday(): ', HolidayUtil.getHoliday(2025, 4, 27)?.isWork())
-
-  // 检查周六日是否补班
-
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
 
   // 每分钟更新时间
   useEffect(() => {
@@ -82,6 +83,11 @@ const Calendar: React.FC = () => {
 
     return () => clearInterval(timer);
   }, []);
+
+  const weekdayHeaders = useMemo(() => {
+    const base = ['日', '一', '二', '三', '四', '五', '六'];
+    return weekStartMonday ? [...base.slice(1), base[0]] : base;
+  }, [weekStartMonday]);
 
   // 日期导航处理
   const navigate = (years = 0, months = 0) => {
@@ -99,23 +105,34 @@ const Calendar: React.FC = () => {
 
   // 生成日历数据
   const calendarDays = useMemo(() => {
+    // 获取当前展示的年月
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-
+    // 计算当月边界
     const { firstDay, lastDay } = getMonthBoundaries(year, month);
     const daysInMonth = lastDay.getDate();
-    const firstDayOfWeek = firstDay.getDay();
+    let firstDayOfWeek = firstDay.getDay();
 
+    // 如果以周一为一周的第一天，调整第一天的位置
+    if (weekStartMonday) {
+      // 将周日(0)转换为6，其他减1，使周一变为0
+      firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+    }
+
+    // 生成42个单元格（6周）
     return Array.from({ length: 42 }, (_, i) => {
+      // 计算日期偏移量
+      const dayOffset = i - (weekStartMonday ? firstDayOfWeek : firstDayOfWeek);
+
+      // 过滤非当月日期
       if (i < firstDayOfWeek || i >= firstDayOfWeek + daysInMonth) {
         return null;
       }
-      return new Date(year, month, i - firstDayOfWeek + 1);
-    });
-  }, [currentDate]);
 
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth();
+      // 生成具体日期对象
+      return new Date(year, month, dayOffset + 1);
+    });
+  }, [currentDate, weekStartMonday]);
 
   return (
     <div className="calendar-container">
@@ -148,7 +165,7 @@ const Calendar: React.FC = () => {
       </div>
 
       <div className="calendar-grid">
-        {['日', '一', '二', '三', '四', '五', '六'].map(day => (
+        {weekdayHeaders.map(day => (
           <div key={day} className="weekday-header">{day}</div>
         ))}
 
