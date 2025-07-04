@@ -130,6 +130,27 @@
   transition: all 0.2s ease;
   border: 1px solid #eaeaea;
 
+  &.other-month {
+    background-color: #f8f8f8;
+    opacity: 0.7;
+
+    .solar-day {
+      color: #999 !important;
+    }
+
+    .lunar-day {
+      color: #ccc !important;
+    }
+
+    /* 保持原有状态样式优先级 */
+    &.today {
+      opacity: 1;
+      .solar-day {
+        color: #e74c3c !important;
+      }
+    }
+  }
+
   .day-tip {
     position: absolute;
     top: 5px;

@@ -20,14 +20,13 @@ interface CalendarProps {
 
 // 日历单元格组件
 interface CalendarCellProps {
-  date: Date | null;
+  date: Date;
   isToday: boolean;
+  currentMonth: number; // 当前月份
 }
 
-const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday }) => {
-  if (!date) {
-    return <div className="calendar-cell empty" />;
-  }
+const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday, currentMonth }) => {
+  const isCurrentMonth = date.getMonth() === currentMonth;
 
   const lunar = Lunar.fromDate(date);
   // 周末
@@ -60,7 +59,7 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday }) => {
   }
 
   return (
-    <div className={`calendar-cell ${isWeekend && isHoliday && !isWorkup ? 'holiday' : isWeekend && !isWorkup ? 'weekend' : isHoliday && !isWorkup ? 'holiday' : isWorkup ? 'work-up' : ''} ${isToday ? 'today' : ''}`}>
+    <div className={`calendar-cell ${!isCurrentMonth ? 'other-month' : ''} ${isWeekend && isHoliday && !isWorkup ? 'holiday' : isWeekend && !isWorkup ? 'weekend' : isHoliday && !isWorkup ? 'holiday' : isWorkup ? 'work-up' : ''} ${isToday ? 'today' : ''}`}>
       {render()}
       <div className="solar-day">{date.getDate()}</div>
       <div className="lunar-day">{lunar.getDayInChinese()}</div>
@@ -68,7 +67,7 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday }) => {
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = true }) => {
+const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = false }) => {
   const now = useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = useState(now);
   const [today, setToday] = useState(now);
@@ -109,9 +108,9 @@ const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = true }) => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     // 计算当月边界
-    const { firstDay, lastDay } = getMonthBoundaries(year, month);
+    const { firstDay } = getMonthBoundaries(year, month);
     // 当月有多少天
-    const daysInMonth = lastDay.getDate();
+    // const daysInMonth = lastDay.getDate();
     // 当月第一天是星期几
     let firstDayOfWeek = firstDay.getDay();
 
@@ -121,6 +120,9 @@ const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = true }) => {
       firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
     }
 
+    // 创建包含完整6周的日期数组（42天）
+    const startDate = new Date(year, month, 1 - firstDayOfWeek);
+
     /**
      * 生成42个单元格（6周）:
      * 问: 为什么需要 42 个单元格？
@@ -128,21 +130,26 @@ const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = true }) => {
      *     2. 固定 6 行可避免月份切换时的布局跳动。
      */
     return Array.from({ length: 42 }, (_, i) => {
-      // 计算日期偏移量
-      const dayOffset = i - (weekStartMonday ? firstDayOfWeek : firstDayOfWeek);
-
-      /**
-       * 过滤非当月日期:
-       *  1. 如果 i 小于 firstDayOfWeek，说明是上个月的日期
-       *  2. 如果 i 大于等于 firstDayOfWeek + daysInMonth，说明是下个月的日期
-       */
-      if (i < firstDayOfWeek || i >= firstDayOfWeek + daysInMonth) {
-        return null;
-      }
-
-      // 生成具体日期对象
-      return new Date(year, month, dayOffset + 1);
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      return date;
     });
+    // return Array.from({ length: 42 }, (_, i) => {
+    //   // 计算日期偏移量
+    //   const dayOffset = i - (weekStartMonday ? firstDayOfWeek : firstDayOfWeek);
+    //
+    //   /**
+    //    * 过滤非当月日期:
+    //    *  1. 如果 i 小于 firstDayOfWeek，说明是上个月的日期
+    //    *  2. 如果 i 大于等于 firstDayOfWeek + daysInMonth，说明是下个月的日期
+    //    */
+    //   if (i < firstDayOfWeek || i >= firstDayOfWeek + daysInMonth) {
+    //     return null;
+    //   }
+    //
+    //   // 生成具体日期对象
+    //   return new Date(year, month, dayOffset + 1);
+    // });
   }, [currentDate, weekStartMonday]);
 
   return (
@@ -184,7 +191,8 @@ const Calendar: React.FC<CalendarProps> = ({ weekStartMonday = true }) => {
           <CalendarCell
             key={index}
             date={date}
-            isToday={date ? isSameDate(date, today) : false}
+            isToday={isSameDate(date, today)}
+            currentMonth={currentMonth} // 传递当前月份
           />
         ))}
       </div>
