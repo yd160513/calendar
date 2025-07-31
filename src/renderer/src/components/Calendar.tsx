@@ -36,6 +36,8 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday, currentMonth
   console.log(isHoliday)
   // 补班
   const isWorkup = isHoliday?.isWork();
+  // 节气
+  const solarTerm = lunar.getJieQi()
 
   const render = () => {
     // 既是周末又是节假日且不调休
@@ -62,7 +64,7 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday, currentMonth
     <div className={`calendar-cell ${!isCurrentMonth ? 'other-month' : ''} ${isWeekend && isHoliday && !isWorkup ? 'holiday' : isWeekend && !isWorkup ? 'weekend' : isHoliday && !isWorkup ? 'holiday' : isWorkup ? 'work-up' : ''} ${isToday ? 'today' : ''}`}>
       {render()}
       <div className="solar-day">{date.getDate()}</div>
-      <div className="lunar-day">{lunar.getDayInChinese()}</div>
+      <div className="lunar-day">{solarTerm || lunar.getDayInChinese()}</div>
     </div>
   );
 };
