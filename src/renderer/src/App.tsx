@@ -1,4 +1,4 @@
-import Calendar from "@renderer/components/Calendar";
+import Calendar from '@renderer/components/calendar/index'
 import React from 'react'
 
 function App(): React.JSX.Element {
