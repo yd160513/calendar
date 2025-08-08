@@ -1,16 +1,36 @@
+// src/preload/index.ts
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
   // 发送系统通知
-  sendNotification: (title: string, body: string) => {
-    console.log('preload-----1111', title, body)
-    ipcRenderer.send('show-notification', { title, body })
+  sendSedentaryReminder: (content: string) => {
+    console.log('preload-----1111', content)
+    ipcRenderer.send('sedentary-reminder', { content })
+  },
+  onSetReminderContent: (cb) => {
+    ipcRenderer.on('set-reminder-content', (_, content) => {
+      cb(content)
+    })
+  },
+  // 重启提醒
+  restartReminder: () => {
+    ipcRenderer.send('restart-reminder')
+  },
+  // 关闭提醒
+  dismissReminder: () => {
+    ipcRenderer.send('dismiss-reminder')
+  },
+  // 监听重启久坐计时器消息
+  onRestartSedentaryTimer: (cb) => {
+    ipcRenderer.on('restart-sedentary-timer', () => {
+      cb()
+    })
   }
 }
 
-// Use `contextBridge` APIs to expose Electron APIs to
+// Use [contextBridge](file:///Users/dong/Documents/project/calendar/node_modules/electron/electron.d.ts#L24729-L24729) APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
 if (process.contextIsolated) {

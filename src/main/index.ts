@@ -1,11 +1,17 @@
+// src/main/index.ts
 import { app, shell, BrowserWindow, ipcMain, Notification } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+// 保存当前提醒窗口的引用
+let reminderWindow: BrowserWindow | null = null
+// 保存主窗口引用
+let mainWindow: BrowserWindow | null = null
+
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     title: '万年历 - 您的私人日历',
     width: 900,
     height: 670,
@@ -20,7 +26,7 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow!.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -35,16 +41,49 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  // 监听主窗口关闭事件
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
 }
 
-// 添加通知功能
-const showNotification = (title: string, body: string) => {
-  console.log('showNotification-----', title, body)
-  new Notification({
-    title,
-    body,
-    timeoutType: 'never'
-  }).show()
+// 创建久坐提醒窗口
+const createReminderWindow = (content: string) => {
+  // 如果已经存在提醒窗口，先关闭它
+  if (reminderWindow) {
+    reminderWindow.destroy()
+  }
+
+  reminderWindow = new BrowserWindow({
+    width: 300,
+    height: 180,
+    show: true,
+    resizable: false,
+    autoHideMenuBar: true,
+    frame: false,
+    alwaysOnTop: true,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+
+  // 加载提醒窗口页面
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    reminderWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/reminder.html`)
+  } else {
+    reminderWindow.loadFile(join(__dirname, '../renderer/reminder.html'))
+  }
+
+  reminderWindow.webContents.on('did-finish-load', () => {
+    reminderWindow!.webContents.send('set-reminder-content', content)
+  })
+
+  // 监听窗口关闭事件
+  reminderWindow.on('closed', () => {
+    reminderWindow = null
+  })
 }
 
 // This method will be called when Electron has finished
@@ -64,10 +103,35 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
-  // 添加IPC监听器用于显示通知
-  ipcMain.on('show-notification', (_, { title, body }) => {
-    console.log('show-notification', title, body)
-    showNotification(title, body)
+  // 监听久坐提醒
+  ipcMain.on('sedentary-reminder', (_, { content }) => {
+    console.log('sedentary-reminder', content)
+    createReminderWindow(content)
+  })
+
+  // 监听重启提醒请求
+  ipcMain.on('restart-reminder', () => {
+    console.log('restart-reminder')
+    // 关闭当前提醒窗口
+    if (reminderWindow) {
+      reminderWindow.destroy()
+      reminderWindow = null
+    }
+
+    // 通知主窗口重新开始计时
+    if (mainWindow) {
+      mainWindow.webContents.send('restart-sedentary-timer')
+    }
+  })
+
+  // 监听关闭提醒请求
+  ipcMain.on('dismiss-reminder', () => {
+    console.log('dismiss-reminder')
+    // 关闭当前提醒窗口
+    if (reminderWindow) {
+      reminderWindow.destroy()
+      reminderWindow = null
+    }
   })
 
   createWindow()

@@ -17,7 +17,7 @@ const App: React.FC = () => {
     setIsPopupVisible(true);
 
     // 发送系统通知
-    window.api?.sendNotification?.('久坐提醒', content);
+    window.api?.sendSedentaryReminder?.(content);
   };
 
   const handleRestartReminder = () => {

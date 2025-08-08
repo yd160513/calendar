@@ -1,5 +1,5 @@
 // renderer/src/components/reminders/SedentaryReminder.tsx
-import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
 import { Button, Modal, Form, InputNumber, Input, message } from 'antd';
 import dayjs from 'dayjs';
 
@@ -24,6 +24,26 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
   const [nextReminderTime, setNextReminderTime] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
+  // 使用 useRef 保存当前状态的引用
+  const stateRef = useRef({
+    isReminderActive,
+    nextReminderTime,
+    isPaused,
+    intervalMinutes,
+    reminderContent
+  });
+
+  // 更新 stateRef 的值
+  useEffect(() => {
+    stateRef.current = {
+      isReminderActive,
+      nextReminderTime,
+      isPaused,
+      intervalMinutes,
+      reminderContent
+    };
+  }, [isReminderActive, nextReminderTime, isPaused, intervalMinutes, reminderContent]);
+
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
 
@@ -44,6 +64,22 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
       if (timer) clearTimeout(timer);
     };
   }, [isReminderActive, nextReminderTime, isPaused, reminderContent, onReminderTrigger]);
+
+  // 监听从主进程发来的重启计时器消息
+  useEffect(() => {
+    const handleRestartSedentaryTimer = () => {
+      console.log('Received restart-sedentary-timer message');
+      handleRestartReminder();
+    };
+
+    // 添加事件监听器
+    window.api?.onRestartSedentaryTimer?.(handleRestartSedentaryTimer);
+
+    // 清理函数
+    return () => {
+      // 如果API提供了移除监听器的方法，可以在这里调用
+    };
+  }, []);
 
   // 暴露给父组件的方法
   useImperativeHandle(ref, () => ({
@@ -77,9 +113,13 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
 
   // 处理用户点击"再次开始"按钮
   const handleRestartReminder = () => {
-    const nextTime = Date.now() + intervalMinutes * 60 * 1000;
-    setNextReminderTime(nextTime);
-    setIsPaused(false); // 取消暂停状态
+    // 只有在提醒处于活动状态时才重启
+    if (stateRef.current.isReminderActive) {
+      const nextTime = Date.now() + stateRef.current.intervalMinutes * 60 * 1000;
+      setNextReminderTime(nextTime);
+      setIsPaused(false); // 取消暂停状态
+      message.success('久坐提醒计时已重启');
+    }
   };
 
   return (
@@ -90,6 +130,10 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
         danger={isReminderActive}
       >
         {isReminderActive ? "停止久坐提醒" : "启动久坐提醒"}
+      </Button>
+
+      <Button type="primary" onClick={() => window.api?.sendSedentaryReminder?.('xxxxxxxx')}>
+        测试打开窗口
       </Button>
 
       <Modal
