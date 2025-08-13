@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { Layout } from 'antd';
 import Calendar from './components/calendar/Calendar';
 import SedentaryReminder from './components/reminders/SedentaryReminder';
@@ -6,19 +6,6 @@ import SedentaryReminder from './components/reminders/SedentaryReminder';
 const { Content } = Layout;
 
 const App: React.FC = () => {
-  const sedentaryReminderRef = useRef<{ handleRestartReminder: () => void } | null>(null);
-
-  const handleReminderTrigger = (content: string) => {
-    window.api?.sendSedentaryReminder?.(content);
-  };
-
-  const handleRestartReminder = () => {
-    // 调用子组件的 handleRestartReminder 方法
-    if (sedentaryReminderRef.current) {
-      sedentaryReminderRef.current.handleRestartReminder();
-    }
-  };
-
   return (
     <Layout style={{ height: '100vh' }}>
       <Content style={{ display: 'flex', padding: '20px' }}>
@@ -36,10 +23,7 @@ const App: React.FC = () => {
           flexDirection: 'column'
         }}>
           <div style={{ marginBottom: '16px' }}>
-            <SedentaryReminder
-              ref={sedentaryReminderRef}
-              onReminderTrigger={handleReminderTrigger}
-            />
+            <SedentaryReminder />
           </div>
         </div>
       </Content>

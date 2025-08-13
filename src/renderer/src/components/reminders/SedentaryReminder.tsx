@@ -1,18 +1,7 @@
-import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Modal, Form, InputNumber, Input, message } from 'antd';
 
-interface SedentaryReminderProps {
-  onReminderTrigger: (content: string) => void;
-}
-
-export interface SedentaryReminderRef {
-  handleRestartReminder: () => void;
-}
-
-const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, SedentaryReminderProps> = (
-  { onReminderTrigger },
-  ref
-) => {
+const SedentaryReminder: React.FC = () => {
   const [isSettingModalVisible, setIsSettingModalVisible] = useState(false);
   const [isReminderActive, setIsReminderActive] = useState(false);
   const [intervalMinutes, setIntervalMinutes] = useState(1);
@@ -51,7 +40,8 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
 
       if (timeToNextReminder > 0) {
         timer = setTimeout(() => {
-          onReminderTrigger(reminderContent);
+          // 发送系统通知
+          window.api?.sendSedentaryReminder?.(reminderContent);
           // 暂停计时器而不是自动设置下次提醒
           setIsPaused(true);
         }, timeToNextReminder);
@@ -61,7 +51,7 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isReminderActive, nextReminderTime, isPaused, reminderContent, onReminderTrigger]);
+  }, [isReminderActive, nextReminderTime, isPaused, reminderContent]);
 
   // 监听从主进程发来的重启计时器消息
   useEffect(() => {
@@ -78,11 +68,6 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
       // 如果API提供了移除监听器的方法，可以在这里调用
     };
   }, []);
-
-  // 暴露给父组件的方法
-  useImperativeHandle(ref, () => ({
-    handleRestartReminder
-  }));
 
   const handleStartReminder = () => {
     setIsSettingModalVisible(true);
@@ -130,7 +115,11 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
         {isReminderActive ? "停止久坐提醒" : "启动久坐提醒"}
       </Button>
 
-      <Button type="primary" onClick={() => window.api?.sendSedentaryReminder?.('xxxxxxxx')}>
+      <Button
+        type="primary"
+        onClick={() => window.api?.sendSedentaryReminder?.('测试提醒内容')}
+        style={{ marginLeft: 8 }}
+      >
         测试打开窗口
       </Button>
 
@@ -176,4 +165,4 @@ const SedentaryReminder: React.ForwardRefRenderFunction<SedentaryReminderRef, Se
   );
 };
 
-export default forwardRef(SedentaryReminder);
+export default SedentaryReminder;
