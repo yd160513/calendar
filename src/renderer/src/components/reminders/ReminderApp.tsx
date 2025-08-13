@@ -15,23 +15,6 @@ const ReminderApp: React.FC = () => {
     });
   }, []);
 
-  useEffect(() => {
-    // 从主进程获取提醒内容
-    const getReminderContent = async () => {
-      try {
-        const content = await window.api?.getReminderContent();
-        if (content) {
-          setReminderContent(content);
-          setReminderTime(dayjs().format('HH:mm:ss')); // 设置当前时间
-        }
-      } catch (error) {
-        console.error('Failed to get reminder content:', error);
-      }
-    };
-
-    getReminderContent();
-  }, []);
-
   const handleRestart = () => {
     window.api?.restartReminder();
   };

@@ -9,6 +9,7 @@ declare global {
       restartReminder: () => void
       dismissReminder: () => void
       onRestartSedentaryTimer: (callback: () => void) => void
+      closeSedentaryReminder: () => void
     }
   }
 }
