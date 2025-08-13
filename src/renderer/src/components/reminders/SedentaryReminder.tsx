@@ -1,7 +1,5 @@
-// renderer/src/components/reminders/SedentaryReminder.tsx
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
 import { Button, Modal, Form, InputNumber, Input, message } from 'antd';
-import dayjs from 'dayjs';
 
 interface SedentaryReminderProps {
   onReminderTrigger: (content: string) => void;
