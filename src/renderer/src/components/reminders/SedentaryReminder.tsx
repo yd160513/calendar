@@ -1,3 +1,4 @@
+// renderer/src/components/reminders/SedentaryReminder.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, Modal, Form, InputNumber, Input, message } from 'antd';
 
@@ -77,6 +78,8 @@ const SedentaryReminder: React.FC = () => {
     setIsReminderActive(false);
     setNextReminderTime(null);
     setIsPaused(false);
+    // 发送消息通知主进程关闭已显示的弹窗
+    window.api?.closeSedentaryReminder?.();
     message.success('久坐提醒已停止');
   };
 

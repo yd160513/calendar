@@ -27,7 +27,9 @@ const api = {
     ipcRenderer.on('restart-sedentary-timer', () => {
       cb()
     })
-  }
+  },
+  // 关闭提醒弹窗
+  closeSedentaryReminder: () => ipcRenderer.send('close-sedentary-reminder'),
 }
 
 // Use [contextBridge](file:///Users/dong/Documents/project/calendar/node_modules/electron/electron.d.ts#L24729-L24729) APIs to expose Electron APIs to

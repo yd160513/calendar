@@ -134,6 +134,20 @@ app.whenReady().then(() => {
     }
   })
 
+  // 关闭提醒窗口
+  ipcMain.on('close-sedentary-reminder', () => {
+    // 查找并关闭当前显示的提醒窗口
+    const reminderWindows = BrowserWindow.getAllWindows().filter(win =>
+      win.getTitle() === '久坐提醒' // 或者通过其他标识识别提醒窗口
+    );
+
+    reminderWindows.forEach(win => {
+      if (!win.isDestroyed()) {
+        win.close();
+      }
+    });
+  });
+
   createWindow()
 
   app.on('activate', function () {
