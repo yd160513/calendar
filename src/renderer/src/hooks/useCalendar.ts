@@ -9,6 +9,7 @@ import { getMonthBoundaries } from '../utils/date';
 export const useCalendar = (weekStartMonday: boolean = false) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [today, setToday] = useState(new Date());
+  const [userNavigated, setUserNavigated] = useState(false); // 标记用户是否手动切换过月份
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
@@ -26,11 +27,12 @@ export const useCalendar = (weekStartMonday: boolean = false) => {
         return prevToday;
       });
 
-      // 使用函数式更新确保始终获取最新的 currentDate
+      // 只有当用户没有手动切换月份时，才自动更新到当前月份
       setCurrentDate(prevCurrentDate => {
         // 检查 currentDate 和实际日期是否在同一月份
-        if (prevCurrentDate.getMonth() !== newToday.getMonth() ||
-          prevCurrentDate.getFullYear() !== newToday.getFullYear()) {
+        if (!userNavigated &&
+            (prevCurrentDate.getMonth() !== newToday.getMonth() ||
+             prevCurrentDate.getFullYear() !== newToday.getFullYear())) {
           // 如果不是，则更新为当前月份
           return newToday;
         }
@@ -39,7 +41,7 @@ export const useCalendar = (weekStartMonday: boolean = false) => {
     }, 60000); // 每分钟检查一次
 
     return () => clearInterval(timer);
-  }, []); // 移除依赖项，使定时器持续运行
+  }, [userNavigated]); // 添加 userNavigated 作为依赖项
 
   const weekdayHeaders = useMemo(() => {
     const base = ['日', '一', '二', '三', '四', '五', '六'];
@@ -56,12 +58,16 @@ export const useCalendar = (weekStartMonday: boolean = false) => {
       );
       return newDate;
     });
+    // 用户手动切换月份时，设置标记
+    setUserNavigated(true);
   };
 
   const goToToday = () => {
     const now = new Date();
     setCurrentDate(now);
     setToday(now);
+    // 回到今天时，清除用户手动切换标记
+    setUserNavigated(false);
   };
 
   // 生成日历数据
