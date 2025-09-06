@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react'
 import { getMonthBoundaries } from '../utils/date';
 
 /**
@@ -7,11 +7,39 @@ import { getMonthBoundaries } from '../utils/date';
  * @returns 日历相关状态和方法
  */
 export const useCalendar = (weekStartMonday: boolean = false) => {
-  const now = useMemo(() => new Date(), []);
-  const [currentDate, setCurrentDate] = useState(now);
-  const [today, setToday] = useState(now);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [today, setToday] = useState(new Date());
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
+
+  // 定期更新 today 状态
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const newToday = new Date();
+      setToday(prevToday => {
+        // 检查是否跨天了
+        if (prevToday.getDate() !== newToday.getDate() ||
+          prevToday.getMonth() !== newToday.getMonth() ||
+          prevToday.getFullYear() !== newToday.getFullYear()) {
+          return newToday;
+        }
+        return prevToday;
+      });
+
+      // 使用函数式更新确保始终获取最新的 currentDate
+      setCurrentDate(prevCurrentDate => {
+        // 检查 currentDate 和实际日期是否在同一月份
+        if (prevCurrentDate.getMonth() !== newToday.getMonth() ||
+          prevCurrentDate.getFullYear() !== newToday.getFullYear()) {
+          // 如果不是，则更新为当前月份
+          return newToday;
+        }
+        return prevCurrentDate;
+      });
+    }, 60000); // 每分钟检查一次
+
+    return () => clearInterval(timer);
+  }, []); // 移除依赖项，使定时器持续运行
 
   const weekdayHeaders = useMemo(() => {
     const base = ['日', '一', '二', '三', '四', '五', '六'];
@@ -30,7 +58,11 @@ export const useCalendar = (weekStartMonday: boolean = false) => {
     });
   };
 
-  const goToToday = () => setCurrentDate(new Date());
+  const goToToday = () => {
+    const now = new Date();
+    setCurrentDate(now);
+    setToday(now);
+  };
 
   // 生成日历数据
   const calendarDays = useMemo(() => {
