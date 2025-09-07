@@ -16,6 +16,12 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday, currentMonth
   const isWorkup = isHoliday?.isWork();
   // 节气
   const solarTerm = lunar.getJieQi();
+  // 获取节日（公历）
+  const solarFestivals = lunar.getSolar().getFestivals();
+  // 合并节日列表
+  const festivals = [...solarFestivals];
+  // 获取第一个节日名称（如果有）
+  const festivalName = festivals.length > 0 ? festivals[0] : '';
 
   const render = () => {
     // 既是周末又是节假日且不调休
@@ -38,11 +44,18 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday, currentMonth
     }
   };
 
+  // 判断是否有节日
+  const hasFestival = festivals.length > 0;
+  // 判断是否有节气
+  const hasSolarTerm = !!solarTerm;
+
   return (
-    <div className={`calendar-cell ${!isCurrentMonth ? 'other-month' : ''} ${isWeekend && isHoliday && !isWorkup ? 'holiday' : isWeekend && !isWorkup ? 'weekend' : isHoliday && !isWorkup ? 'holiday' : isWorkup ? 'work-up' : ''} ${isToday ? 'today' : ''}`}>
+    <div className={`calendar-cell ${!isCurrentMonth ? 'other-month' : ''} ${isWeekend && isHoliday && !isWorkup ? 'holiday' : isWeekend && !isWorkup ? 'weekend' : isHoliday && !isWorkup ? 'holiday' : isWorkup ? 'work-up' : ''} ${isToday ? 'today' : ''} ${hasFestival ? 'festival-day' : ''} ${hasSolarTerm ? 'solar-term-day' : ''}`}>
       {render()}
       <div className="solar-day">{date.getDate()}</div>
-      <div className="lunar-day">{solarTerm || lunar.getDayInChinese()}</div>
+      <div className="lunar-day">
+        {festivalName || solarTerm || lunar.getDayInChinese()}
+      </div>
     </div>
   );
 };

@@ -233,6 +233,19 @@
       font-weight: 500;
     }
   }
+
+  &.festival-day {
+    .lunar-day {
+      color: #e74c3c;
+    }
+  }
+
+  &.solar-term-day {
+    .lunar-day {
+      color: #008c23;
+      font-weight: 500;
+    }
+  }
 }
 
 @keyframes pulse {
