@@ -53,7 +53,7 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday, currentMonth
     <div className={`calendar-cell ${!isCurrentMonth ? 'other-month' : ''} ${isWeekend && isHoliday && !isWorkup ? 'holiday' : isWeekend && !isWorkup ? 'weekend' : isHoliday && !isWorkup ? 'holiday' : isWorkup ? 'work-up' : ''} ${isToday ? 'today' : ''} ${hasFestival ? 'festival-day' : ''} ${hasSolarTerm ? 'solar-term-day' : ''}`}>
       {render()}
       <div className="solar-day">{date.getDate()}</div>
-      <div className="lunar-day">
+      <div className="lunar-day" title={festivalName || solarTerm || lunar.getDayInChinese()}>
         {festivalName || solarTerm || lunar.getDayInChinese()}
       </div>
     </div>
