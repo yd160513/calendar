@@ -100,7 +100,6 @@
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
   flex: 1;
-  overflow: hidden;
 }
 
 .weekday-header {
