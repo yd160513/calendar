@@ -245,6 +245,13 @@
       font-weight: 500;
     }
   }
+
+  &.lunar-first-day {
+    .lunar-day {
+      color: #008c23;
+      font-weight: 500;
+    }
+  }
 }
 
 @keyframes pulse {
