@@ -16,10 +16,12 @@ const CalendarCell: React.FC<CalendarCellProps> = ({ date, isToday, currentMonth
   const isWorkup = isHoliday?.isWork();
   // 节气
   const solarTerm = lunar.getJieQi();
+  // 获取节日（农历）
+  const lunarFestivals = lunar.getFestivals(); // 使用 getFestivals() 替代 getDayFestivals()
   // 获取节日（公历）
   const solarFestivals = lunar.getSolar().getFestivals();
-  // 合并节日列表
-  const festivals = [...solarFestivals];
+  // 合并节日列表，农历节日优先
+  const festivals = [...lunarFestivals, ...solarFestivals];
   // 获取第一个节日名称（如果有）
   const festivalName = festivals.length > 0 ? festivals[0] : '';
 
