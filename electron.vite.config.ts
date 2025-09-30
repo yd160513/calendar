@@ -5,12 +5,7 @@ import { execSync } from 'child_process';
 import pkg from './package.json';
 const { version } = pkg;
 
-// const commitId = execSync(`git rev-parse --short HEAD`).toString().trim();
 const commitId = execSync(`git rev-parse --short v${version}`).toString().trim();
-// 获取版本对应的 commitId（推荐通过 tag）
-// const commitId = execSync(`git rev-list -n 1 v${version}`)
-//   .toString()
-//   .trim();
 
 console.log('commitId:', commitId);
 
