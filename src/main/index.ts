@@ -43,7 +43,17 @@ function createWindow(): void {
   }
 
   // 监听主窗口关闭事件
+  mainWindow.on('close', (event) => {
+    // 如果是 macOS 系统，则阻止窗口真正关闭，改为隐藏
+    if (process.platform === 'darwin') {
+      event.preventDefault();
+      mainWindow!.hide();
+    }
+    console.log('mainWindow close')
+  })
+
   mainWindow.on('closed', () => {
+    console.log('mainWindow closed')
     mainWindow = null
   })
 }
@@ -153,7 +163,19 @@ app.whenReady().then(() => {
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0){
+      createWindow()
+    } else {
+      mainWindow!.show()
+    }
+  })
+
+  app.on('before-quit', () => {
+    // 销毁提醒窗口
+    // 取消对主窗口关闭事件的拦截，允许真正关闭
+    if (mainWindow) {
+      mainWindow.removeAllListeners('close');
+    }
   })
 })
 
