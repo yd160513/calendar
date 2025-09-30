@@ -1,6 +1,18 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
+import { execSync } from 'child_process';
+import pkg from './package.json';
+const { version } = pkg;
+
+// const commitId = execSync(`git rev-parse --short HEAD`).toString().trim();
+const commitId = execSync(`git rev-parse --short v${version}`).toString().trim();
+// 获取版本对应的 commitId（推荐通过 tag）
+// const commitId = execSync(`git rev-list -n 1 v${version}`)
+//   .toString()
+//   .trim();
+
+console.log('commitId:', commitId);
 
 export default defineConfig({
   main: {
@@ -10,6 +22,10 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()]
   },
   renderer: {
+    define: {
+      __COMMIT_ID__: JSON.stringify(commitId),
+      __APP_VERSION__: JSON.stringify(pkg.version)
+    },
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src')
