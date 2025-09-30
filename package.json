@@ -1,6 +1,6 @@
 {
   "name": "calendar",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "基于Electron和React的万年历应用，支持农历、节假日和调休显示",
   "main": "./out/main/index.js",
   "author": "yidong <kouyidong99@163.com>",
