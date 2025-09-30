@@ -91,7 +91,16 @@ const createReminderWindow = (content: string) => {
   })
 
   // 监听窗口关闭事件
+  reminderWindow.on('close', (event) => {
+    console.log('reminderWindow close')
+    // 如果是 macOS 系统，则阻止窗口关闭
+    if (process.platform === 'darwin') {
+      event.preventDefault();
+    }
+  })
+
   reminderWindow.on('closed', () => {
+    console.log('reminderWindow closed')
     reminderWindow = null
   })
 }
@@ -175,6 +184,9 @@ app.whenReady().then(() => {
     // 取消对主窗口关闭事件的拦截，允许真正关闭
     if (mainWindow) {
       mainWindow.removeAllListeners('close');
+    }
+    if (reminderWindow) {
+      reminderWindow.removeAllListeners('close');
     }
   })
 })
