@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 import pkg from './package.json';
 const { version } = pkg;
 
-const commitId = execSync(`git rev-parse --short v${version}`).toString().trim();
+const commitId = execSync(`git rev-parse --short v${version}^{}`).toString().trim();
 
 console.log('commitId:', commitId);
 
