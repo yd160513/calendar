@@ -1,4 +1,5 @@
 import { resolve } from 'path'
+import { rmSync } from 'fs'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process';
@@ -8,6 +9,20 @@ const { version } = pkg;
 const commitId = execSync(`git rev-parse --short v${version}^{}`).toString().trim();
 
 console.log('commitId:', commitId);
+
+const cleanDistPlugin = () => ({
+  name: 'clean-dist',
+  buildStart() {
+    try {
+      // 只清理 renderer 相关目录，避免影响 electron-builder 生成的文件
+      const rendererDist = resolve(__dirname, 'dist/renderer');
+      rmSync(rendererDist, { recursive: true, force: true });
+      console.log('已清理 renderer dist 目录');
+    } catch (error) {
+      console.warn('清理 dist 目录警告:', error);
+    }
+  }
+});
 
 export default defineConfig({
   main: {
@@ -26,7 +41,7 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [react()],
+    plugins: [react(), cleanDistPlugin()],
     build: {
       rollupOptions: {
         input: {
